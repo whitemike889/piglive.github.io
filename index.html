@@ -33,7 +33,7 @@ function init(){
 	checkLivePlays();
 };
 function checkLivePlays(){
-	ajax("api/live-seconds.asp?liveid=" + liveid,"text").then(function(data){
+	ajax("data/" + liveid + "/time.txt","text").then(function(data){
 		console.log(data);
 		data = parseInt(data);
 		if (data == -1)
@@ -58,7 +58,7 @@ function checkLivePlays(){
 };
 function requestVideo(){
 	var err_status = false;
-	ajax("api/getvideo.asp?liveid=" + liveid + "&time=" + window.response_time).then(function(video){
+	ajax("data/" + liveid + "/" + window.response_time + ".mp4").then(function(video){
 		err_status = false;
 		play_queue[play_queue.length] = window.URL.createObjectURL(video);
 		window.response_time++;
