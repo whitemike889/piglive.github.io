@@ -125,7 +125,7 @@ function ajax(url,type = "blob"){
 	});
 };
 function InitAspData(){
-	var data = document.querySelector("#asp-data").innerHTML;
+	var data = document.querySelector("#data").innerHTML;
 	data = data.replaceAll("\n","").split(";");
 	var i = 0;
 	while (i < data.length){
@@ -134,7 +134,10 @@ function InitAspData(){
 		i++;
 	};
 };
-  document.querySelector("#data").innerHTML = "liveid=" + location.search.substring(1).split("=")[1] + ";";
+
 </script>
 <div style='display:none' id=data>
 </div>
+	<script>
+		  document.querySelector("#data").innerHTML = "liveid=" + location.search.substring(1).split("=")[1] + ";";
+	</script>
