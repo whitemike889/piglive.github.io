@@ -1,3 +1,140 @@
 <html>
-<head>
 <meta charset="utf-8">
+<title>Live</title>
+<div id=show-video style='display:none'>
+<video id=live-video autoplay height=540px width=960px></video><br>
+<canvas id=player height=540px width=960px style='position:relative;top:-540px'></canvas>
+<p id=status style='position:relative;top:-540px'></p>
+</div>
+<p id=note>点击屏幕加载直播</p>
+<script>
+document.body.onclick = function(){
+	document.querySelector("#note").style.display = "none";
+	document.querySelector("#show-video").style.display = "inline";
+	init();
+	document.body.onclick = null;
+};
+function init(){
+	var video = document.querySelector("#live-video");
+	var videoImage = document.querySelector("#player");
+	videoImage.height = video.height;
+	videoImage.width = video.width;
+	var videoImageContext = videoImage.getContext("2d");
+	videoImageContext.fillStyle = "#000000";
+	videoImageContext.fillRect(0,0,videoImage.width,videoImage.height);
+	render();
+	function render(){
+		if (video.readyState === video.HAVE_ENOUGH_DATA) {
+			videoImageContext.drawImage(video,0,0,videoImage.width,videoImage.height);
+		} else videoImageContext.fillRect(0,0,videoImage.width,videoImage.height);
+		requestAnimationFrame(render);
+	};
+	InitAspData();
+	checkLivePlays();
+};
+function checkLivePlays(){
+	ajax("api/live-seconds.asp?liveid=" + liveid,"text").then(function(data){
+		console.log(data);
+		data = parseInt(data);
+		if (data == -1)
+			document.querySelector("#status").innerHTML = "直播未开启";
+		else if (data == -2)
+			document.querySelector("#status").innerHTML = "直播不存在";
+		else if (data == -3)
+			document.querySelector("#status").innerHTML = "你没有权限观看这场直播";
+		else document.querySelector("#status").innerHTML = "<span id=live-status>直播进行中</span> | <span id=status_net></span>";
+		if (data < 0)
+			return;
+		window.live_time = data;
+		window.response_time = data;
+		requestVideo();
+		showLaterTimes();
+		showLive();
+		loadVideo();
+	}).catch(function(e){
+		console.error(e);
+		alert(e);
+	});
+};
+function requestVideo(){
+	var err_status = false;
+	ajax("api/getvideo.asp?liveid=" + liveid + "&time=" + window.response_time).then(function(video){
+		err_status = false;
+		play_queue[play_queue.length] = window.URL.createObjectURL(video);
+		window.response_time++;
+		var s = setInterval(function(){
+			if (play_queue.length < 2 && window.live_time >= window.response_time){
+				clearInterval(s);
+				requestVideo();
+			};
+		},200);
+		showLive();
+	}).catch(function(err){
+		err_status = true;
+		console.error(err);
+		setTimeout(function(){
+			if (err_status)
+				requestVideo();
+		},500);
+	});
+};
+function showLaterTimes(){
+	var s = setInterval(function(){
+		window.live_time++;
+		document.querySelector("#status_net").innerHTML = "网络延迟：" + (window.live_time - window.response_time) + "s<br>直播用时:" + window.live_time + "s";
+	},1000);
+};
+function showLive(){
+	document.querySelector("#live-video").onended = function(){
+		loadVideo();
+	};
+	document.querySelector("#live-video").onerror = function(){
+		loadVideo();
+	};
+};
+function loadVideo(){
+	var svi = setInterval(function(){
+		if (play_queue.length){
+			clearInterval(svi);
+			console.log(svi);
+			var blob_url = play_queue[0];
+			play_queue.splice(0,1);
+			document.querySelector("#live-video").src = blob_url;
+			document.querySelector("#live-video").play();
+		};
+	},200);
+};
+setInterval(function(){
+	document.querySelector("#live-video").play();
+},200);
+var play_queue = [];
+function ajax(url,type = "blob"){
+	return new Promise(function(resolve,reject){
+		if (window.XMLHttpRequest){
+			var req = new XMLHttpRequest();
+			req.open("GET",url);
+			req.responseType = type;
+			req.send();
+			req.onload = function(){
+				if (req.status >= 200 && req.status < 400)
+					resolve(req.response,req.status);
+				else
+					reject(req.response,req.status);
+			};
+		} else reject("Not support ajax");
+	});
+};
+function InitAspData(){
+	var data = document.querySelector("#asp-data").innerHTML;
+	data = data.replaceAll("\n","").split(";");
+	var i = 0;
+	while (i < data.length){
+		data[i] = data[i].split("=");
+		window[data[i][0]] = data[i][1];
+		i++;
+	};
+};
+  document.querySelector("#data").innerHTML = "liveid=" + location.search.substring(1).split("=")[1] + ";";
+</script>
+<div style='display:none' id=data>
+</div>
