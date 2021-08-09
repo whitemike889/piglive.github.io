@@ -63,6 +63,7 @@ function reg(){
 						delete no_reg;
 						document.querySelector("#reg_status").innerHTML = "可以注册";
 						document.querySelector("#reg_status").style.color = "green";
+						select_type_change();
 						clearInterval(s);
 					};
 				},1000);
