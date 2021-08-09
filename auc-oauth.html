@@ -1,0 +1,91 @@
+<meta charset="utf-8">
+<body>
+<div id="top_box" style="width:100%;height:48px;background:#24292e;color:rgba(255,255,255,0.7);position:sticky;"><span style="position:absolute;top:8px;font-size:24px;cursor:pointer;" onclick="javascript:location.href='/';">猪猪直播</span>   <input type="text" id="search_live_id" placeholder="跳转到" style="position:absolute;top:12px;font-size:16px;left:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000;width:108px"><div id="user_rg_login_box" style="position:absolute;top:12px;font-size:16px;right:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000"><span id="usr_login_box" style="cursor:pointer" onclick="javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');">登录</span>   <span id="usr_rg_box" style="border-style:solid;border-width:2px;border-color:#ffffff;border-radius:5px;cursor:pointer" onclick="javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');">注册</span></div></div>
+<div id=display></div>
+</body>
+<script src=parseURLArgs.js></script>
+<script src=ajax.js></script>
+<script>
+var args = parseURLArgs();
+if (args.err_code) {
+	alert("Oauth Login was wrong.\nerr_code:" + args.err_code);
+	location.href = "/";
+};
+if (args.username){
+	ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/" + args.username).then(function(res){
+		var data = res[0];
+		var status = res[1];
+		if (status == 404 || status == 403){
+			//新用户注册
+			document.querySelector("#display").innerHTML = "<div style='text-align:center'><center><div id=reg-box style='border-style:solid;border-width:3px;border-color:#e6e6fa;border-radius:8px;width:480px;height:600px'><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:2.5em;color:#ffa500';>用户注册</span><br><span style='font-size:0.8em;color:#87cefa'>这是AUC账户<i><b><font color=red>" + args.username + "</font></b></i>第一次授权PigLive登录</span><br><span style='font-size:0.8em;color:#87cefa'>请先注册</span><br><div id=login-left-box style=''><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.2em;color:#ffa500';>用户名<input id=username maxlength=24 readonly value=" + args.username + " disabled style='width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff';></span><br><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1em;color:#ffa500';>请选择你的身份<select id=reg_type style='font-size:0.8em;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff'; onchange=select_type_change();><option value=visitors>观众</option><option value=recorders>主播</option></select></span><div id=questions style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1em;color:#ffa500'></div><br><span id=reg_status style='color:red'></span><br><input type=button value=注册 onclick=javascript:reg(); style='background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff;width:180px;height:36px' class=reg_button></div></div></center></div></div>";
+		} else if (status == 200){
+			//登录
+			document.cookie = "username=" + atob(args.username);
+			location.href = "/";
+		};
+	}).catch(function(err){
+		console.log(err);
+	});
+};
+var github_token = [btoa("Z2hwX0VpZDhjaEY5ZDA4dGh4dUE4RDNPVUczYzd3Zk16QTNHdUVXYg==")];
+</script>
+<script src=topbox.js></script>
+<script>
+function select_type_change(){
+	var ele = document.querySelector("select");
+	if (ele.value == "visitors"){
+		document.querySelector("#questions").style.display = "none";
+	} else {
+		document.querySelector("#questions").style.display = "inline";
+		var index = parseInt(Math.random() * 3);
+		var ques = ["请问<font color=red>选择排序</font>的<font color=red>最优时间复杂度</font>是什么？<br>A.O(n^2) B.O(n) C.O(n+k) D.O(2^n)","走楼梯，一次可以走1级楼梯或走2级楼梯，求走n级台阶有多少种走法？<br>用动态规划的方法解决这道题，那么，请问<font color=red>状态转移方程</font>是哪一个？<br>A. <font color=blue>f(n)=1</font> B. <font color=blue>f(n)=f(n+1)+f(n-1)</font><br> C. <font color=blue>f(n)=f(n+1)+f(n+2)</font> D.<font color=blue>f(n)=f(n-2)+f(n-1)</font>","以下哪个表达式是用来判断n是否是<font color=red>偶数</font>的<br>A. (n >> 2) B. (n | 1) C. !(n & 1) D.(n & 1)"];
+		var anss = ["A","D","C"];
+		window.ans = anss[index];
+		document.querySelector("#questions").innerHTML = "<br>请先完成验证（以确定你不是来闹事的）<hr>题目在下面列出<hr><p id=list_question>" + ques[index] + "</p><hr><a href=# onclick=javascript:select_type_change();>脑子抽筋，不会做？换一题</a><br>答案在此填写<input id=question_user_ans maxlength=1 style='width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff'; type=text><hr>";
+	};
+};
+function reg(){
+	if (!window.no_reg){
+		var reg_type = document.querySelector("select").value;
+		if (reg_type == "recorders"){
+			var user_ans = document.querySelector("#question_user_ans").value;
+			if (user_ans != window.ans){
+				document.querySelector("#reg_status").style.color = "red";
+				document.querySelector("#reg_status").innerHTML = "答案错误！请在30秒后重新注册";
+				window.no_reg = true;
+				var t = 30;
+				var s = setInterval(function(){
+					window.t = t;
+					document.querySelector("#reg_status").innerHTML = "请在" + t + "秒后重新注册";
+					t--;	
+					if (t <= 0){
+						delete window.no_reg;
+						delete no_reg;
+						document.querySelector("#reg_status").innerHTML = "可以注册";
+						document.querySelector("#reg_status").style.color = "green";
+						clearInterval(s);
+					};
+				},1000);
+			};
+		};
+		if (window.XMLHttpRequest)
+			var xhr = new XMLHttpRequest();
+		else
+			var xhr = new ActiveXObject("Microsoft.XMLHTTP");
+		xhr.open("PUT","https://api.github.com/repos/chenglan28/chenglan28.github.io/contents/userdata/" + args.username + "?access_token=" + github_token[0],true);
+		xhr.send({message:"OAUTH REGISTER " + args.username,content:atob(JSON.stringify({usertype:reg_type}))});
+		xhr.onload = function(){
+			document.querySelector("#reg_status").style.color = "green";
+			document.querySelector("#reg_status").innerHTML = "注册成功！即将跳转";
+			setTimeout(function(){
+				location.href = "/";
+			},1500);
+		};
+		xhr.onerror = function(e){
+			document.querySelector("#reg_status").innerHTML = "注册失败！\n错误代码：" + e;
+		};
+	} else {
+		document.querySelector("#reg_status").innerHTML = "请在" + window.t + "秒后重新注册";
+	};
+};
+</script>

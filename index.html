@@ -1,28 +1,9 @@
 <meta charset="utf-8">
 <title>猪猪直播</title>
 <pre>
-<div id=top_box style='width:100%;height:48px;background:#24292e;color:rgba(255,255,255,0.7);position:sticky;'><span style='position:absolute;top:8px;font-size:24px;cursor:pointer;' onclick=javascript:location.href='/';>猪猪直播</span>   <input type=text id=search_live_id placeholder='Jump to' style='position:absolute;top:12px;font-size:16px;left:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000;width:108px'><div id=user_rg_login_box style='position:absolute;top:12px;font-size:16px;right:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000'><span id=usr_login_box style='cursor:pointer' onclick=javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');>Sign In</span>   <span id=usr_rg_box style='border-style:solid;border-width:2px;border-color:#ffffff;border-radius:5px;cursor:pointer' onclick=javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');>Sign Up</span></div></div>
+<div id=top_box style='width:100%;height:48px;background:#24292e;color:rgba(255,255,255,0.7);position:sticky;'><span style='position:absolute;top:8px;font-size:24px;cursor:pointer;' onclick=javascript:location.href='/';>猪猪直播</span>   <input type=text id=search_live_id placeholder='跳转到' style='position:absolute;top:12px;font-size:16px;left:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000;width:108px'><div id=user_rg_login_box style='position:absolute;top:12px;font-size:16px;right:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000'><span id=usr_login_box style='cursor:pointer' onclick=javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');>登录</span>   <span id=usr_rg_box style='border-style:solid;border-width:2px;border-color:#ffffff;border-radius:5px;cursor:pointer' onclick=javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');>注册</span></div></div>
 </pre>
 <script>
-document.querySelector("#search_live_id").addEventListener("focus",function(){	
-	//搜索框得到焦点
-	var ele = document.querySelector("#search_live_id");
-	ele.style.width = "180px";
-	ele.style.background = "#ffffff";
-	ele.style.color = "#000000";
-});
-document.querySelector("#search_live_id").addEventListener("blur",function(){
-	//搜索框失去焦点
-	var ele = document.querySelector("#search_live_id");
-	ele.style.width = "108px";
-	ele.style.background = "#24292e";
-	ele.style.color = "rgba(255,255,255,0.7)";
-});
-document.querySelector("#search_live_id").addEventListener("keydown",function(e){
-	if (e.keyCode == 13){
-		//Enter
-		var ele = document.querySelector("#search_live_id");
-		location.href = "/search?method=liveid&q=" + ele.value;
-	};
-});
+
 </script>
+<script src=topbox.js></script>
