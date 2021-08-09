@@ -5,6 +5,7 @@
 </body>
 <script src=parseURLArgs.js></script>
 <script src=ajax.js></script>
+<script src=cookie.js></script>
 <script>
 var args = parseURLArgs();
 if (args.err_code) {
@@ -74,10 +75,11 @@ function reg(){
 		else
 			var xhr = new ActiveXObject("Microsoft.XMLHTTP");
 		xhr.open("PUT","https://api.github.com/repos/chenglan28/chenglan28.github.io/contents/userdata/" + args.username + "?access_token=" + github_token[0],true);
-		xhr.send({message:"OAUTH REGISTER " + args.username,content:btoa(JSON.stringify({usertype:reg_type}))});
+		xhr.send(JSON.stringify({message:"OAUTH REGISTER " + args.username,content:btoa(JSON.stringify({usertype:reg_type}))}));
 		xhr.onload = function(){
 			document.querySelector("#reg_status").style.color = "green";
 			document.querySelector("#reg_status").innerHTML = "注册成功！即将跳转";
+			setcookie("token",btoa(args.username));
 			setTimeout(function(){
 				location.href = "/";
 			},1500);
