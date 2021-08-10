@@ -47,9 +47,9 @@ if (args.username){
 					window.upload_image = false;
 				};
 			};
-		} else if (status == 200){
+		} else if (status >= 200 && status < 400){
 			//登录
-			document.cookie = "username=" + atob(args.username);
+			setcookie("token",btoa(args.username));
 			location.href = "/";
 		};
 	}).catch(function(err){
