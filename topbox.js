@@ -19,3 +19,8 @@ document.querySelector("#search_live_id").addEventListener("keydown",function(e)
 		location.href = "/search?method=liveid&q=" + ele.value;
 	};
 });
+var username = getcookie("token");
+if (username != null){
+	username = atob(username);
+	document.querySelector("#user_rg_login_box").innerHTML = "<span style='font-size:20px'>" + username + "</span><img height=32px width=32px src=https://cdn.jsdelivr.net/gh/piglive/piglive.github.io/user-avatar/" + username + ".png onclick=javascript:location.href='user?" + username + "'>";
+};

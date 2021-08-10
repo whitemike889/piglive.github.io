@@ -18,7 +18,35 @@ if (args.username){
 		var status = res[1];
 		if (status == 404 || status == 403){
 			//新用户注册
-			document.querySelector("#display").innerHTML = "<div style='text-align:center'><center><div id=reg-box style='border-style:solid;border-width:3px;border-color:#e6e6fa;border-radius:8px;width:480px;height:600px'><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:2.5em;color:#ffa500';>用户注册</span><br><span style='font-size:0.8em;color:#87cefa'>这是AUC账户<i><b><font color=red>" + args.username + "</font></b></i>第一次授权PigLive登录</span><br><span style='font-size:0.8em;color:#87cefa'>请先注册</span><br><div id=login-left-box style=''><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.2em;color:#ffa500';>用户名<input id=username maxlength=24 readonly value=" + args.username + " disabled style='width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff';></span><br><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1em;color:#ffa500';>请选择你的身份<select id=reg_type style='font-size:0.8em;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff'; onchange=select_type_change();><option value=visitors>观众</option><option value=recorders>主播</option></select></span><div id=questions style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1em;color:#ffa500'></div><br><span id=reg_status style='color:red'></span><br><input type=button value=注册 onclick=javascript:reg(); style='background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff;width:180px;height:36px' class=reg_button></div></div></center></div></div>";
+			document.querySelector("#display").innerHTML = "<div style='text-align:center'><center><div id=reg-box style='border-style:solid;border-width:3px;border-color:#e6e6fa;border-radius:8px;width:480px;height:600px'><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:2.5em;color:#ffa500';>用户注册</span><br><span style='font-size:0.8em;color:#87cefa'>这是AUC账户<i><b><font color=red>" + args.username + "</font></b></i>第一次授权PigLive登录</span><br><span style='font-size:0.8em;color:#87cefa'>请先注册</span><br><div id=login-left-box style=''><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.2em;color:#ffa500';>用户名<input id=username maxlength=24 readonly value=" + args.username + " disabled style='width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff';></span><br><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1em;color:#ffa500';>请选择你的身份<select id=reg_type style='font-size:0.8em;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff'; onchange=select_type_change();><option value=visitors>观众</option><option value=recorders>主播</option></select></span><div id=questions style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1em;color:#ffa500'></div><br><span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1em;color:#ffa500';>请上传您的头像<br><input type=file accept=image/* id=user-avatar-upload style='background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff;width:320px;height:28px'><img id=user-avatar><br><span style='font-size:0.8em'>大小不得超过64 * 64，jpg/png/bmp/webp格式</span><br><span id=user-avatar-check-status style='color:green'></span></span><br><span id=reg_status style='color:red'></span><br><input type=button value=注册 onclick=javascript:reg(); style='background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff;width:180px;height:36px' class=reg_button><br><span id=upload-status style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1em;color:red'></span></div></div></center></div></div>";
+			document.querySelector("#user-avatar-upload").onchange = function(){
+				var file = document.querySelector("#user-avatar-upload").files[0];
+				var reader = new FileReader();
+				reader.readAsDataURL(file);
+				reader.onload = function(){
+					var dataurl = reader.result;
+					var base64 = dataurl.substring(dataurl.indexOf(";base64,") + 8);
+					window.user_avatar_base64 = base64;
+					var blob_url = window.URL.createObjectURL(file);
+					document.querySelector("#user-avatar").src = blob_url;
+					document.querySelector("#user-avatar").onload = function(){
+						var img = document.querySelector("#user-avatar");
+						if (img.height > 64 || img.width > 64){
+							document.querySelector("#user-avatar-check-status").innerHTML = "用户头像大小不得大于64 * 64";
+							document.querySelector("#user-avatar-check-status").style.color = "red";
+							window.upload_image = false;
+						} else {
+							document.querySelector("#user-avatar-check-status").innerHTML = "头像 √";
+							document.querySelector("#user-avatar-check-status").style.color = "green";
+							window.upload_image = true;
+						};
+					};
+		
+				};
+				reader.onerror = function(){
+					window.upload_image = false;
+				};
+			};
 		} else if (status == 200){
 			//登录
 			document.cookie = "username=" + atob(args.username);
@@ -46,6 +74,7 @@ function select_type_change(){
 	};
 };
 function reg(){
+	if (window.upload_image){
 	if (!window.no_reg){
 		var reg_type = document.querySelector("select").value;
 		if (reg_type == "recorders"){
@@ -71,19 +100,36 @@ function reg(){
 				return;
 			};
 		};
+		document.querySelector("#upload-status").innerHTML = "正在上传您的数据......";
 		if (window.XMLHttpRequest)
 			var xhr = new XMLHttpRequest();
 		else
 			var xhr = new ActiveXObject("Microsoft.XMLHTTP");
-		xhr.open("PUT","https://api.github.com/repos/chenglan28/chenglan28.github.io/contents/userdata/" + args.username + "?access_token=" + github_token[0],true);
+		xhr.open("PUT","https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/" + args.username,true);
+		xhr.setRequestHeader("Authorization","token " + get_access_token());
 		xhr.send(JSON.stringify({message:"OAUTH REGISTER " + args.username,content:btoa(JSON.stringify({usertype:reg_type}))}));
 		xhr.onload = function(){
-			document.querySelector("#reg_status").style.color = "green";
-			document.querySelector("#reg_status").innerHTML = "注册成功！即将跳转";
-			setcookie("token",btoa(args.username));
-			setTimeout(function(){
-				location.href = "/";
-			},1500);
+			document.querySelector("#upload-status").innerHTML = "正在上传您的头像......";
+			if (window.XMLHttpRequest)
+				var xhr2 = new XMLHttpRequest();
+			else
+				var xhr2 = new ActiveXObject("Microsoft.XMLHTTP");
+			xhr2.open("PUT","https://api.github.com/repos/piglive/piglive.github.io/contents/user-avatar/" + args.username + ".png",true);
+			xhr2.setRequestHeader("Authorization","token " + get_access_token());
+			xhr2.send(JSON.stringify({message:"OAUTH REGISTER " + args.username,content:getUserAvatar()}));
+			xhr2.onload = function(){
+				document.querySelector("#upload-status").innerHTML = "上传成功！";
+			
+				document.querySelector("#reg_status").style.color = "green";
+				document.querySelector("#reg_status").innerHTML = "注册成功！即将跳转";
+				setcookie("token",btoa(args.username));
+				setTimeout(function(){
+					location.href = "/";
+				},1500);
+			};
+			xhr2.onerror = function(e){
+				document.querySelector("#reg_status").innerHTML = "注册失败！\n错误代码：" + e;
+			};			
 		};
 		xhr.onerror = function(e){
 			document.querySelector("#reg_status").innerHTML = "注册失败！\n错误代码：" + e;
@@ -91,5 +137,15 @@ function reg(){
 	} else {
 		document.querySelector("#reg_status").innerHTML = "请在" + window.t + "秒后重新注册";
 	};
+	} else {
+		document.querySelector("#reg_status").innerHTML = "请上传用户头像";
+	};
 };
+function get_access_token(){
+	return github_token[0];
+};
+function getUserAvatar(){
+	return window.user_avatar_base64;
+};
+
 </script>
