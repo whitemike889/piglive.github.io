@@ -54,7 +54,7 @@ if (args.username){
 			setcookie("token",btoa(args.username));
 			location.href = "/";
 		} else {
-			alert("登录失败！\n错误代码：" + status + "\n请与工作人员练习");
+			alert("登录失败！\n错误代码：" + status + "\n请与工作人员联系");
 			location.href = "/";
 		};
 	}).catch(function(err){
