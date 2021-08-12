@@ -41,4 +41,18 @@
  <changefreq>always</changefreq>
 </url>
 
+<url>
+ <loc>https://piglive.github.io/bkg-img/live.jpg</loc>
+ <priority>1.0</priority>
+ <lastmod>2021-08-12</lastmod>
+ <changefreq>always</changefreq>
+</url>
+
+<url>
+ <loc>https://piglive.github.io/bkg-img/piglive.bmp</loc>
+ <priority>1.0</priority>
+ <lastmod>2021-08-12</lastmod>
+ <changefreq>always</changefreq>
+</url>
+
 </urlset>
