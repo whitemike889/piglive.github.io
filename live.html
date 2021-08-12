@@ -1,0 +1,106 @@
+<meta charset="utf-8">
+<pre style='width:100%;height:100%;background-image:url("https://cdn.jsdelivr.net/gh/piglive/piglive.github.io/bkg-img/live.jpg");' id=content-frame>
+<div id=top_box style='width:100%;height:48px;background:#24292e;color:rgba(255,255,255,0.7);position:sticky;'><span style='position:absolute;top:8px;font-size:24px;cursor:pointer;' onclick=javascript:location.href='/';>猪猪直播</span>   <input type=text id=search_live_id placeholder='跳转到' style='position:absolute;top:12px;font-size:16px;left:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000;width:108px'><div id=user_rg_login_box style='position:absolute;top:12px;font-size:16px;right:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000'><span id=usr_login_box style='cursor:pointer' onclick=javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');>登录</span>   <span id=usr_rg_box style='border-style:solid;border-width:2px;border-color:#ffffff;border-radius:5px;cursor:pointer' onclick=javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');>注册</span></div></div>
+<div id=live-area style='border-style:solid;border-width:5px;border-color:#87cefa;border-radius:10px;background:#e6e6fa'>
+<center><span style='font-size:1.4em;color:#ffa500;font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;'><span id=live-username></span>的直播间</span></center><br>
+<canvas id=video-players height=450px width=800px>你的浏览器不支持此框架，请更换浏览器</canvas>
+<span style='font-size:1em;color:#ffa500;font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;' id=live-status></span>
+<span style='font-size:1em;color:#ffa500;font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;'>直播回放<select id=select_live style='font-size:0.8em;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff' onchange=change_live()><option value=current>现在</option></select></span>
+</div>
+</pre>
+<video id=live-video autoplay height=450px width=800px style='z-index:-1;position:fixed;top:0%;left:0%'></video>
+<script src=cookie.js></script>
+<script src=ajax.js></script>
+<script src=init.js></script>
+<script src=https://pv.sohu.com/cityjson></script>
+<script>
+var username = location.search.substring(1);
+document.head.innerHTML += "<title>" + username + " 的直播间 | 猪猪直播</title>";
+document.querySelector("#live-username").innerHTML = username;
+
+ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/" + username + "?t=" + new Date().getTime()).then(function(res){
+	var userinfo = JSON.parse(res[0]);
+	var status = res[1];
+	if (status == 404){
+		document.querySelector("#live-status").innerHTML = "<a onclick=javascript:location.href='/';>这个直播间不存在哦~<br>戳我返回主页</a>";
+		document.querySelector("#live-status").style.color = "red";
+	};
+	if (status == 403){
+		var err_message = userinfo.message;
+		var visit_gh_ip = err_message.substring(28).split(".");
+		visit_gh_ip = visit_gh_ip[0] + "." + visit_gh_ip[1] + "." + visit_gh_ip[2] + "." + visit_gh_ip[3];
+		document.querySelector("#live-status").innerHTML = "错误：403 Forbidden<br>您的ip已被封禁<br>您的ip地址：" + visit_gh_ip + "<br>您的操作过于频繁，ip被封禁1小时，请在1小时后重试<br>解决办法：<br>  · 使用代理服务器访问此网页<br>  · 重启您的路由器<br>  · 使用移动数据连接<br>  · 关闭您的移动数据连接再打开<br>解封时间：<span id=gh-api-reset-time></span><br>将在<span id=gh-api-reset-remain-sec></span>秒后解封";
+		document.querySelector("#live-status").style.color = "red";
+		ajax("https://api.github.com/rate_limit?t=" + new Date().getTime()).then(function(res){
+			var limit = JSON.parse(res[0]);
+			var unix_t = limit.resources.core.reset * 1000;
+			var reset_date = new Date(unix_t);
+			var current_time = new Date();
+			var current_unix_t = current_time.getTime();
+			var unix_t_diff = unix_t - current_unix_t;
+			var sec_diff = parseInt(unix_t_diff / 1000);
+			document.querySelector("#gh-api-reset-remain-sec").innerHTML = sec_diff;
+			var s = setInterval(function(){
+				sec_diff--;
+				document.querySelector("#gh-api-reset-remain-sec").innerHTML = sec_diff;
+				if (sec_diff < 0) {
+					location.reload();
+				};
+			},1000);
+			document.querySelector("#gh-api-reset-time").innerHTML = reset_date.getFullYear() + "年" + (reset_date.getMonth() + 1) + "月" + reset_date.getDay() + "日" + reset_date.getHours() + "时" + reset_date.getMinutes() + "分" + reset_date.getSeconds() + "秒" + reset_date.getMilliseconds() + "毫秒";
+		});
+	};
+	if (status >= 200 && status < 300){
+		//Successful
+		var user_data_obj = JSON.parse(atob(userinfo.content));
+		if (user_data_obj.usertype != "recorders"){
+			//不是主播
+			document.querySelector("#live-status").innerHTML = "<a onclick=javascript:location.href='/';>这个直播间不存在哦~<br>戳我返回主页</a>";
+			document.querySelector("#live-status").style.color = "red";
+			return;
+		};
+		var live_datas = user_data_obj.lives;
+		if (!live_datas){
+			document.querySelector("#live-status").innerHTML = "<a onclick=javascript:location.href='/';>Ta还没有开始直播哦~<br>戳我返回主页</a>";
+			document.querySelector("#live-status").style.color = "red";
+			//直播数据不存在			
+			return;
+		};
+		//----------------------------
+		var i = 0;
+		var html = "";
+		while (i < live_datas.length){
+			//遍历live_datas
+			html += "<option value=" + live_datas[i].repo + ";" + current_live.livedate + ">" + live_datas[i].livedate + "</option>";
+			//生成回看数据html 
+			i++;
+		};
+		//添加数据到回放单上
+		document.querySelector("#select_live").innerHTML += html;
+		//----------------------------	
+		var current_live = live_datas[live_datas.length];
+		if (!current_live.livedate || current_live.finished){
+			//直播日期不存在（部署了直播储存库但没开始直播）
+			//或者是 直播已结束
+			document.querySelector("#live-status").innerHTML = "<a onclick=javascript:location.href='/';>Ta还没有开始直播哦~<br>戳我返回主页</a>";
+			document.querySelector("#live-status").style.color = "red";	
+			return;			
+		};
+		//排除以上情况，那么剩下的代码就是用来处理 直播正在进行了
+		//抓取直播数据库信息
+		ajax("https://api.github.com/gh/" + current_live.repo + "/piglive/" + current_live.livedate + "/info?t=" + new Date().getTime()).then(function(res){
+			if (res[1] >= 200 && res[1] < 400){
+				//请求成功
+			} else {
+				//请求失败
+				document.querySelector("#live-status").innerHTML = "<a onclick=javascript:location.reload();>抓取直播数据异常~<br>戳我刷新此页面</a><br><a onclick=javascript:location.href='/';>戳我返回主页</a>";
+			};
+		}).catch(function(err){
+			console.error(err);
+		});
+	};
+}).catch(function(e){
+	console.error(e);
+});
+</script>
+<script src=topbox.js></script>

@@ -1,11 +1,13 @@
 <meta charset="utf-8">
 <body>
+<title>猪猪直播 - OauthSystem登录系统 (AUC账户)</title>
 <div id="top_box" style="width:100%;height:48px;background:#24292e;color:rgba(255,255,255,0.7);position:sticky;"><span style="position:absolute;top:8px;font-size:24px;cursor:pointer;" onclick="javascript:location.href='/';">猪猪直播</span>   <input type="text" id="search_live_id" placeholder="跳转到" style="position:absolute;top:12px;font-size:16px;left:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000;width:108px"><div id="user_rg_login_box" style="position:absolute;top:12px;font-size:16px;right:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000"><span id="usr_login_box" style="cursor:pointer" onclick="javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');">登录</span>   <span id="usr_rg_box" style="border-style:solid;border-width:2px;border-color:#ffffff;border-radius:5px;cursor:pointer" onclick="javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');">注册</span></div></div>
 <div id=display></div>
 </body>
 <script src=parseURLArgs.js></script>
 <script src=ajax.js></script>
 <script src=cookie.js></script>
+<script src=init.js></script>
 <script>
 var args = parseURLArgs();
 if (args.err_code) {
@@ -13,7 +15,7 @@ if (args.err_code) {
 	location.href = "/";
 };
 if (args.username){
-	ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/" + args.username).then(function(res){
+	ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/" + args.username + "?t=" + new Date().getTime()).then(function(res){
 		var data = res[0];
 		var status = res[1];
 		if (status == 404 || status == 403){
