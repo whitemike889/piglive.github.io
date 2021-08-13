@@ -1,0 +1,157 @@
+<meta charset="utf-8">
+<body>
+<title>猪猪直播 - 设置直播</title>
+<div id="top_box" style="width:100%;height:48px;background:#24292e;color:rgba(255,255,255,0.7);position:sticky;"><span style="position:absolute;top:8px;font-size:24px;cursor:pointer;" onclick="javascript:location.href='/';">猪猪直播</span>   <input type="text" id="search_live_id" placeholder="跳转到" style="position:absolute;top:12px;font-size:16px;left:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000;width:108px"><div id="user_rg_login_box" style="position:absolute;top:12px;font-size:16px;right:108px;background:#24292e;color:rgba(255,255,255,0.7);caret-color:#000000"><span id="usr_login_box" style="cursor:pointer" onclick="javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');">登录</span>   <span id="usr_rg_box" style="border-style:solid;border-width:2px;border-color:#ffffff;border-radius:5px;cursor:pointer" onclick="javascript:window.open('https://chenglan28.github.io/auc/oauth?https://piglive.github.io/auc-oauth;username','_blank');">注册</span></div></div>
+<center><div id=display style='border-style:solid;border-width:3px;border-color:#e6e6fa;border-radius:8px;width:800px;height:600px;overflow:auto'>
+<span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:2.5em;color:#ffa500'>设置</span>
+<hr>
+<span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.6em;color:#ffa500'>我的直播记录</span><br>
+<span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.2em;color:#ffa500' id=live-records></span><br>
+<span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.2em;color:red' id=live-records-save-status></span><br>
+<input type="button" value="保存" onclick="javascript:save_live_records();" style="background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff;width:120px;height:24px">
+<hr>
+<span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.6em;color:#ffa500'>录制器配置文件</span><br>
+<div style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.2em;color:#ffa500'>视频分段时长<input id="video-segment-secs" maxlength="2" readonly="" value=4s disabled="" style="width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff"><br>视频录制区域<input id="video-record-area" maxlength="10" value=-1 style="width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff"><br><span style='font-size:0.8em'>值为-1时表示全屏</span><br>视频录制偏移量（相对0,0）<input id="video-diff-x" maxlength="4" value=0 style="width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff">,<input id="video-diff-y" maxlength="4" value=0 style="width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff"><br>视频帧数<input id="video-fps" maxlength="3" value=24 style="width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff"><br>视频码率<input id="video-code-rate" maxlength="5" value=600k style="width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff"><br><input type="button" value="下载" onclick="javascript:download_live_cfg();" style="background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff;width:120px;height:24px"></div>
+<hr>
+<span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.6em;color:#ffa500'>我的PigLive Token</span><br>
+<span style='font-family:Cursive,Helvetica,sans-serif;white-space:pre-wrap;font-size:1.2em;color:#ffa500' id=piglive-token></span><br>
+
+</div></center>
+</body>
+<script src=parseURLArgs.js></script>
+<script src=ajax.js></script>
+<script src=cookie.js></script>
+<script src=init.js></script>
+<script src=topbox.js></script>
+<script src=lib/spark-md5.js></script>
+<script>
+var username = getcookie("token");
+if (username == null)
+	location.href = "/";
+username = atob(username);
+ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/" + username + "?t=" + new Date().getTime()).then(function(res){
+	var status = res[1];
+	if (status == 404)
+		location.href = "/";
+	if (status == 403)
+		location.href = "/live?piglive";
+	var content = JSON.parse(atob(JSON.parse(res[0]).content));
+	window.sha = JSON.parse(res[0]).sha;
+	if (content.usertype != "recorders"){
+		location.href = "/";
+	};
+	if (!content.lives){
+		//无直播记录
+		content.lives = [];
+	};
+	var i = 0;
+	var str = "";
+	while (i < content.lives.length){
+		if (i == (content.lives.length - 1)){
+			//The last
+			if (!content.lives[i].livedate){
+				//直播日期不存在
+				//直播未开始
+				var live_no_starts = true;
+				break;
+			};
+		};
+		str += "[" + (i + 1) + "] " + content.lives[i].livedate + " | 存储库 " + content.lives[i].repo + " | GitHub Token " + atob(content.lives[i].token) + "<br>";
+		i++;
+	};
+	window.content = content;
+	str += "[<span id=live-num>" + (i + 1) + "</span>] 还没有开始直播哦~ | 储存库 <input id=live-record-repo maxlength=32 style=width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff> | GitHub Token <input id=live-record-token maxlength=42 style=width:128px;background:#ffdead;border-style:solid;border-width:2px;border-radius:6px;border-color:#ffffff><br>";
+	document.querySelector("#live-records").innerHTML = str;
+	if (live_no_starts){
+		console.log(content,content.lives,i,content.lives[i]);
+		document.querySelector("#live-record-repo").value = content.lives[i].repo;
+		document.querySelector("#live-record-token").value = atob(content.lives[i].token);
+		document.querySelector("#piglive-token").innerHTML = "正在生成你的PigLive Token......";
+		const md5 = "" + SparkMD5.hashBinary(content.lives[i].token) + SparkMD5.hashBinary(content.lives[i].repo);;
+		document.querySelector("#piglive-token").innerHTML = md5;
+	} else {
+		document.querySelector("#piglive-token").innerHTML = "你还没有PigLive Token哦~<br>申请下一次的直播并填写完信息后系统会自动为你生成PigLive Token<br>该token只能用一次，直播结束后该token会自动销毁";
+	};
+}).catch(function(err){
+	alert(err);
+	location.href = "/live?piglive";
+});
+function get_access_token(){
+	return github_token[0];
+};
+function save_live_records(){
+	var live_num = parseInt(document.querySelector("#live-num").innerHTML) - 1;
+	var record_repo = document.querySelector("#live-record-repo").value;
+	var record_token = btoa(document.querySelector("#live-record-token").value);
+	if (!(record_repo || record_token)){
+		//数据为空
+		delete window.content[live_num];
+	} else {
+		//有数据
+		window.content.lives[live_num] = {repo:record_repo,token:record_token};
+	};
+	document.querySelector("#live-records-save-status").innerHTML = "正在检验您是否有对储存库的编辑权限";
+	upload_data("https://api.github.com/repos/" + record_repo + "/contents/piglive/test/" + new Date().getTime() + "?t=" + new Date().getTime(),"test",atob(record_token)).then(function(res){
+		var status = res[1];
+		console.log(res);
+		if (status < 200 || status >= 400){
+			//Failed to upload
+			document.querySelector("#live-records-save-status").innerHTML = "您没有对储存库的编辑权限<br>请检查你的项目名称和token是否填写正确";
+			return;
+		} else {
+			//Upload successful
+			document.querySelector("#live-records-save-status").innerHTML = "正在上传你的数据......";
+			upload_data("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/" + username + "?t=" + new Date().getTime(),JSON.stringify(window.content),get_github_token(),window.sha).then(function(res){
+				var status = res[1];
+				if (status >= 200 && status < 400){
+					document.querySelector("#live-records-save-status").innerHTML = "上传成功<br>刷新此页面以计算PigLive Token";
+				} else {
+					document.querySelector("#live-records-save-status").innerHTML = "上传失败<br>请重试";
+				};
+			}).catch(function(err){
+				alert(err);
+				location.reload();
+			});
+		};
+	}).catch(function(err){
+		console.error(err);
+		document.querySelector("#live-records-save-status").innerHTML = "检验失败<br>请检查你的项目名称和token是否填写正确<br>请刷新页面重试";
+	});
+	
+};
+var github_token = [atob("Z2hwX0VpZDhjaEY5ZDA4dGh4dUE4RDNPVUczYzd3Zk16QTNHdUVXYg==")];
+function get_github_token(){
+	return github_token[0];
+};
+function download_live_cfg(){
+	var text = "";
+	text += document.querySelector("#video-record-area").value + "\n";
+	text += document.querySelector("#video-diff-x").value + "\n";
+	text += document.querySelector("#video-diff-y").value + "\n";
+	text += document.querySelector("#video-fps").value + "\n";
+	text += document.querySelector("#video-code-rate").value + "\n";
+	var blob = function(buffer,cfg){
+		if (Blob)
+			return new Blob(buffer,cfg);
+		else if (BlobBuilder)
+			return new BlobBuilder(buffer,cfg);
+		else if (WebKitBlobBuilder)
+			return new WebKitBlobBuilder(buffer,cfg);
+		else if (MozBlobBuilder)
+			return new MozBlobBuilder(buffer,cfg);
+		else if (MSBlobBuilder)
+			return new MSBlobBuilder(buffer,cfg);
+		else return null;
+	};
+	var file = blob([text],{"type":"text/*"});
+	var url = window.URL.createObjectURL(file);
+	var ele = document.createElement("a");
+	ele.href = url;
+	ele.download = "live.cfg";
+	ele.click();
+		
+
+
+	
+};
+</script>
