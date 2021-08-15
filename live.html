@@ -78,7 +78,7 @@ ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/"
 		//添加数据到回放单上
 		document.querySelector("#select_live").innerHTML += html;
 		//----------------------------	
-		var current_live = live_datas[live_datas.length];
+		var current_live = live_datas[live_datas.length - 1];
 		if (!current_live.livedate || current_live.finished){
 			//直播日期不存在（部署了直播储存库但没开始直播）
 			//或者是 直播已结束
