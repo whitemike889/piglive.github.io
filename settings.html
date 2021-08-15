@@ -46,6 +46,9 @@ ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/"
 	};
 	var i = 0;
 	var str = "";
+	var current_date_obj = new Date();
+	//计算当前日期
+	var current_date = current_date_obj.getDay() + "-" + current_date_obj.getMonth() + "-" + current_date_obj.getFullYear();
 	while (i < content.lives.length){
 		if (i == (content.lives.length - 1)){
 			//The last
@@ -54,6 +57,11 @@ ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/"
 				//直播未开始
 				var live_no_starts = true;
 				break;
+			};
+			if (content.lives[i].livedate != current_date){
+				//现在的日期与直播日期不同
+				//设置直播结束
+				content.lives[i].finished = true;
 			};
 		};
 		str += "[" + (i + 1) + "] " + content.lives[i].livedate + " | 存储库 " + content.lives[i].repo + " | GitHub Token " + atob(content.lives[i].token) + "<br>";
@@ -67,7 +75,7 @@ ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/"
 		document.querySelector("#live-record-repo").value = content.lives[i].repo;
 		document.querySelector("#live-record-token").value = atob(content.lives[i].token);
 		document.querySelector("#piglive-token").innerHTML = "正在生成你的PigLive Token......";
-		const md5 = "" + SparkMD5.hashBinary(content.lives[i].token) + SparkMD5.hashBinary(content.lives[i].repo);;
+		const md5 = "" + SparkMD5.hashBinary(content.lives[i].token) + SparkMD5.hashBinary(content.lives[i].repo);
 		document.querySelector("#piglive-token").innerHTML = md5;
 	} else {
 		document.querySelector("#piglive-token").innerHTML = "你还没有PigLive Token哦~<br>申请下一次的直播并填写完信息后系统会自动为你生成PigLive Token<br>该token只能用一次，直播结束后该token会自动销毁";

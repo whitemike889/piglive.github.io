@@ -71,7 +71,7 @@ ajax("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/"
 		var html = "";
 		while (i < live_datas.length){
 			//遍历live_datas
-			html += "<option value=" + live_datas[i].repo + ";" + current_live.livedate + ">" + live_datas[i].livedate + "</option>";
+			html += "<option value=" + live_datas[i].repo + ";" +  live_datas[i].livedate + ">" + live_datas[i].livedate + "</option>";
 			//生成回看数据html 
 			i++;
 		};
