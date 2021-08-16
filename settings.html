@@ -98,7 +98,7 @@ function save_live_records(){
 		upload_data("https://api.github.com/repos/piglive/piglive.github.io/contents/userdata/" + username + "?t=" + new Date().getTime(),JSON.stringify(window.content),get_github_token(),window.sha).then(function(res){
 			var status = res[1];
 			if (status >= 200 && status < 400){
-				document.querySelector("#live-records-save-status").innerHTML = "上传成功<br>刷新此页面以计算PigLive Token";
+				document.querySelector("#live-records-save-status").innerHTML = "上传成功<br>";
 			} else {
 				document.querySelector("#live-records-save-status").innerHTML = "上传失败<br>请重试";
 			};
@@ -106,6 +106,7 @@ function save_live_records(){
 			alert(err);
 			location.reload();
 		});
+		return;
 	} else {
 		//有数据
 		window.content.lives[live_num] = {repo:record_repo,token:record_token};
